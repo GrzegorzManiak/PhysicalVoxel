@@ -100,7 +100,7 @@ pub struct Chunk {
     pub position: Vec3,
     pub size: u32,
     pub surface_level: u8,
-    pub vertex_vector: Vec<u8>,
+    pub point_cloud: Vec<Point>,
 }
 
 impl Chunk {
@@ -109,8 +109,21 @@ impl Chunk {
             position: Vec3::default(),
             size: 8,
             surface_level: 64,
-            vertex_vector: Vec::new(),
+            point_cloud: Vec::new(),
         }
+    }
+
+    pub fn get_point(&mut self, pos: Vec3) -> Point {
+        let mut point = Point::default();
+
+        for f_point in &mut self.point_cloud {
+            if f_point.pos == pos {
+                point.pos = pos;        
+                point.level = f_point.level;
+            }
+        }
+
+        point
     }
 }
 

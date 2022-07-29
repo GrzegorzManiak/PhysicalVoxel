@@ -1,13 +1,8 @@
 use bevy::{prelude::*, render::mesh::{PrimitiveTopology, Indices}};
 
-use crate::components::{Chunk, MarchingCubeSystem, Triangle};
+use crate::components::{Chunk, Triangle, Point};
 mod marching_cube_table;
 use marching_cube_table::*;
-
-fn u8_to_grayscale(u8_value: u8) -> Color {
-    let value = u8_value as f32 / 255.0;
-    Color::rgb(value, value, value)
-}
 
 pub fn new(
     mut commands: Commands,
@@ -22,7 +17,16 @@ pub fn new(
         // -- Generate a random number --
         let random_number = rand::random::<u8>();
 
-        chunk.vertex_vector.push(50);
+        let pos = Vec3::new(
+            (x % (chunk.size + 1)) as f32,
+            (x / (chunk.size + 1) % (chunk.size + 1)) as f32,
+            (x / (chunk.size + 1).pow(2)) as f32,
+        );  
+
+        chunk.point_cloud.push(Point {
+            level: random_number,
+            pos,
+        });
     }
 
 
@@ -30,11 +34,17 @@ pub fn new(
     let mut triangles = Vec::new();
 
     for cube in 0..u32::pow(chunk.size, 3) {
-        let points = get_cube_points(&mut chunk, cube); 
+        let cloud_points = get_cube_points(index_to_vec3(8, cube), &mut chunk); 
+
+        let mut points:[u8; 8] = [0; 8];
+        let mut coords:[Vec3; 8] = [Vec3::default(); 8];
+
+        for (i, p) in cloud_points.iter().enumerate() {
+            points[i] = p.level;
+            coords[i] = p.pos;
+        }
 
         let cube_index = get_cube_index(&mut chunk, points);
-
-        let corner_coordinates = corner_coordinates(&mut chunk, cube); 
 
         let edge_indices = TRIANGULATION_TABLE[cube_index as usize]; 
 
@@ -56,9 +66,9 @@ pub fn new(
 
             let mut triangle: Triangle = Triangle::default();
 
-            triangle.a = (corner_coordinates[a0 as usize] + corner_coordinates[a1 as usize]) * 0.5;
-            triangle.b = (corner_coordinates[b0 as usize] + corner_coordinates[b1 as usize]) * 0.5;
-            triangle.c = (corner_coordinates[c0 as usize] + corner_coordinates[c1 as usize]) * 0.5;
+            triangle.a = (coords[a0 as usize] + coords[a1 as usize]) * 0.5;
+            triangle.b = (coords[b0 as usize] + coords[b1 as usize]) * 0.5;
+            triangle.c = (coords[c0 as usize] + coords[c1 as usize]) * 0.5;
 
             triangles.push(triangle);
         }
@@ -131,56 +141,27 @@ fn index_to_vec3(size: u32, index: u32) -> Vec3 {
     Vec3::new(x as f32, y as f32, z as f32)
 }
 
-fn get_cube_points(chunk: &mut Chunk, index: u32) -> [u8; 8] {
-    let mut points = [0; 8];
-    let size = chunk.size;
+fn get_cube_points(cube_pos: Vec3, chunk: &mut Chunk) -> Vec<Point> {
+    // --[ Get the 8 points of the cube ]-- //
+    let mut points_pos = Vec::new();
+    
+    points_pos.push(cube_pos + Vec3::new(0.0, 0.0, 0.0));
+    points_pos.push(cube_pos + Vec3::new(1.0, 0.0, 0.0));
+    points_pos.push(cube_pos + Vec3::new(1.0, 1.0, 0.0));
+    points_pos.push(cube_pos + Vec3::new(0.0, 1.0, 0.0));
+    points_pos.push(cube_pos + Vec3::new(0.0, 0.0, 1.0));
+    points_pos.push(cube_pos + Vec3::new(1.0, 0.0, 1.0));
+    points_pos.push(cube_pos + Vec3::new(1.0, 1.0, 1.0));
+    points_pos.push(cube_pos + Vec3::new(0.0, 1.0, 1.0));
 
-    let x = index % size;
-    let y = index / u32::pow(size, 2);
-    let z = (index / size) % size;
 
-    // 8x8x8 Point cloud
-    // 7x7x7 cube grid
-    // EG: index 2(0..) => vertex = [3, 4, 11, 12, 67, 68, 75, 76]
+    // --[ Locate the 8 points ]-- //
+    let mut points = Vec::new();
 
-    let point_index = |x, y, z| {
-        (x + y * (size + 1) + z * u32::pow(size + 1, 2)) as usize
-    };
-
-    // -- Top --
-    points[0] = chunk.vertex_vector[point_index(x, y, z)];
-    points[1] = chunk.vertex_vector[point_index(x + 1, y, z)];
-    points[2] = chunk.vertex_vector[point_index(x, y + 1, z)];
-    points[3] = chunk.vertex_vector[point_index(x + 1, y + 1, z)];
-
-    // -- Bottom --
-    points[4] = chunk.vertex_vector[point_index(x, y, z + 1)];
-    points[5] = chunk.vertex_vector[point_index(x + 1, y, z + 1)];
-    points[6] = chunk.vertex_vector[point_index(x, y + 1, z + 1)];
-    points[7] = chunk.vertex_vector[point_index(x + 1, y + 1, z + 1)];
+    for i in 0..points_pos.len() {
+        points.push(chunk.get_point(points_pos[i]));
+    }
 
     points
-}
-
-
-fn corner_coordinates(chunk: &mut Chunk, index: u32) -> [Vec3; 8] {
-    let size = chunk.size;
-
-    let x = index % size;
-    let y = index / u32::pow(size, 2);
-    let z = (index / size) % size;
-
-    let mut coordinates: [Vec3; 8] = [Vec3::new(0.0, 0.0, 0.0); 8];
-
-    coordinates[0] = Vec3::new(x as f32, y as f32, z as f32);
-    coordinates[1] = Vec3::new(x as f32 + 1.0, y as f32, z as f32);
-    coordinates[2] = Vec3::new(x as f32, y as f32 + 1.0, z as f32);
-    coordinates[3] = Vec3::new(x as f32 + 1.0, y as f32 + 1.0, z as f32);
-    coordinates[4] = Vec3::new(x as f32, y as f32, z as f32 + 1.0);
-    coordinates[5] = Vec3::new(x as f32 + 1.0, y as f32, z as f32 + 1.0);
-    coordinates[6] = Vec3::new(x as f32, y as f32 + 1.0, z as f32 + 1.0);
-    coordinates[7] = Vec3::new(x as f32 + 1.0, y as f32 + 1.0, z as f32 + 1.0);
-
-    coordinates 
 }
  
