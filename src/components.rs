@@ -99,7 +99,7 @@ impl CameraInputs {
 pub struct Chunk {
     pub position: Vec3,
     pub size: u32,
-    pub surface_level: u8,
+    pub isolevel: u8,
     pub point_cloud: Vec<Point>,
 }
 
@@ -107,8 +107,8 @@ impl Chunk {
     pub fn default() -> Self {
         Self {
             position: Vec3::default(),
-            size: 8,
-            surface_level: 64,
+            size: 12,
+            isolevel: 200,
             point_cloud: Vec::new(),
         }
     }
