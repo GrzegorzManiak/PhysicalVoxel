@@ -2,12 +2,11 @@ use bevy::{prelude::*, math::vec3};
 use bevy_editor_pls::prelude::*;
 use bevy_rapier3d::prelude::*;
 use bevy_easings::EasingsPlugin;
-
-mod controller;
-use components::CameraMode;
-use controller::*;
+use bevy_prototype_debug_lines::*;
 
 mod components;
+mod controller;
+mod terrain_engine;   
 
 /// set up a simple 3D scene
 fn setup(
@@ -17,32 +16,27 @@ fn setup(
 ) {
     // plane
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane { size: 15.0 })),
+        mesh: meshes.add(Mesh::from(shape::Plane { size: 100.0 })),
         transform: Transform { translation: vec3(0.0, -1.0, 0.0), ..Default::default() },
         material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
         ..default()
-    });
+    })
+    .insert(Collider::cuboid(100.0, 0.1, 100.0))
+    .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, -1.0, 0.0)));
 
-    // // cube
-    // commands.spawn_bundle(PbrBundle {
-    //     mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-    //     material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-    //     transform: Transform::from_xyz(0.0, 0.5, 0.0),
-    //     ..default()
-    // });
 
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 1500.0,
+            intensity: 15500.0,
             shadows_enabled: true,
+            range: 500.0,
+            radius: 40.0,
             ..default()
         },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(0.0, 50.0, 14.0),
         ..default()
     });
-
-    
 }
 
 fn main() {
@@ -50,10 +44,14 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(CharacterControllerPlugin)
+
+        .add_plugin(controller::CharacterControllerPlugin)
+        .add_plugin(terrain_engine::VoxelEnginePlugin)
+
         .insert_resource(Msaa { samples: 4 })
         .add_plugin(EasingsPlugin)
-        .add_startup_system(setup)    
+        .add_startup_system(setup)  
+        .add_plugin(DebugLinesPlugin::default())  
         .add_plugin(EditorPlugin)
         .run();
 }

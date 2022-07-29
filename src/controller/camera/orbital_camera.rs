@@ -1,9 +1,9 @@
-use bevy::{prelude::Transform, math::Vec3};
+use bevy::{prelude::Transform, math::Vec3, reflect::Reflect};
 
 use crate::components::OrbitCamera;
 
 pub fn manager(
-    orbital_camera: &OrbitCamera,
+    orbital_camera: &mut OrbitCamera,
     transform: &mut Transform,
     player_transform: Transform,
 ) {
@@ -18,11 +18,20 @@ pub fn manager(
         orbital_camera.camera_distance,
     );
 
-    // -- Set the camera position with offsets --
-    camera_translation.x = orbit.x + player_translation.x;
-    camera_translation.y = orbit.y + player_translation.y;
-    camera_translation.z = orbit.z + player_translation.z;
+    let pos = Vec3::new(
+        orbit.x + player_translation.x,
+        orbit.y + player_translation.y,
+        orbit.z + player_translation.z,
+    );
 
+    // -- Set the camera position with offsets --
+    camera_translation.x = pos.x;
+    camera_translation.y = pos.y;
+    camera_translation.z = pos.z;
+
+    // -- Update the camera position --
+    orbital_camera.camera_position = pos;
+    
     // -- Look at the player --
     transform.look_at(*player_translation, Vec3::Y);
 }
@@ -32,7 +41,7 @@ pub fn manager(
 // the xz and xy planes based on the given angle and distance.
 // https://math.stackexchange.com/questions/989900/calculate-x-y-z-from-two-specific-degrees-on-a-sphere
 // (cosϕ×sinθ,cosϕ×cosθ,sinϕ)
-fn calculate_orbit(degrees_x: f32, degrees_y: f32, distance: f32) -> Vec3 {
+pub fn calculate_orbit(degrees_x: f32, degrees_y: f32, distance: f32) -> Vec3 {
     let radians_y = degrees_x.to_radians();
     let radians_x = degrees_y.to_radians();
     

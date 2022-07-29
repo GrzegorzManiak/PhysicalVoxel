@@ -1,24 +1,7 @@
-use bevy::{prelude::*, input::*};
+use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
 
 // region: --Common Components--
-
-#[derive(Component, Default, Clone, Debug)]
-pub struct Velocity {
-    pub x: f32,
-    pub y: f32,
-}
-
-impl Velocity {
-    pub fn new(x: f32, y: f32) -> Self {
-        Self { x, y }
-    }
-
-    pub fn zero() -> Self {
-        Self { x: 0.0, y: 0.0 }
-    }
-}   
-
 
 #[derive(Component, Default, Clone, Debug)]
 pub struct Rotation {
@@ -28,10 +11,6 @@ pub struct Rotation {
 }
 
 impl Rotation {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z }
-    }
-
     pub fn zero() -> Self {
         Self { x: 0.0, y: 0.0, z: 0.0, }
     }
@@ -67,6 +46,8 @@ pub struct OrbitCamera {
     pub camera_step_distance: u32,
     pub camera_step_lerp: f32,  
     pub camera_step_max: u32,
+
+    pub camera_position: Vec3,  
 }
 
 impl OrbitCamera {
@@ -83,6 +64,7 @@ impl OrbitCamera {
             camera_step_distance: 5,
             camera_step_lerp: 0.25,
             camera_step_max: 5,       
+            camera_position: Vec3::default(),
         }
     }
 }
@@ -113,3 +95,54 @@ impl CameraInputs {
 }
 
 // endregion: --Inputs--
+
+pub struct Chunk {
+    pub position: Vec3,
+    pub size: u32,
+    pub surface_level: u8,
+    pub vertex_vector: Vec<u8>,
+}
+
+impl Chunk {
+    pub fn default() -> Self {
+        Self {
+            position: Vec3::default(),
+            size: 8,
+            surface_level: 64,
+            vertex_vector: Vec::new(),
+        }
+    }
+}
+
+
+
+pub struct Triangle {
+    pub a: Vec3,
+    pub b: Vec3,
+    pub c: Vec3,
+}
+
+impl Triangle {
+    pub fn default() -> Self {
+        Self {
+            a: Vec3::default(),
+            b: Vec3::default(),
+            c: Vec3::default(),
+        }
+    }
+}
+
+
+pub struct Point {
+    pub level: u8,
+    pub pos: Vec3,
+}
+
+impl Point {
+    pub fn default() -> Self {
+        Self {
+            level: 0,
+            pos: Vec3::default(),
+        }
+    }
+}

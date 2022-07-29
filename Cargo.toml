@@ -10,6 +10,7 @@ bevy_easings = "0.7.0"
 bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy-editor-pls.git" }
 bevy_rapier3d = "0.15.0"
 bevy-inspector-egui = "0.11.0"
+bevy_prototype_debug_lines = { version = "0.7", features = ["3d"] }
 
 [workspace]
 resolver = "2" # Important! wgpu/Bevy needs this!

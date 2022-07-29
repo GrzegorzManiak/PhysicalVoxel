@@ -1,7 +1,7 @@
 use bevy::{prelude::{With, Query, Camera, Transform, EventReader, ParamSet }, input::mouse::MouseMotion};
 use crate::components::{OrbitCamera, CameraMode, Player};
 
-mod orbital_camera;
+pub mod orbital_camera;
 pub mod camera_distance;
 
 pub fn manager(

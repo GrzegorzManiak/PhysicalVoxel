@@ -1,5 +1,7 @@
-use bevy::{prelude::*, input::mouse::MouseMotion};
+use bevy::prelude::*;
 use bevy_inspector_egui::*;
+use bevy_prototype_debug_lines::DebugLines;
+use bevy_rapier3d::prelude::{Collider, Velocity, GravityScale, Sleeping, Ccd, RigidBody, LockedAxes};
 use crate::components::*;
  
 mod camera;
@@ -28,40 +30,59 @@ impl Plugin for CharacterControllerPlugin {
 pub fn character_controller(
     mut query: ParamSet<(
         Query<(&mut Velocity, &mut Transform), With<Player>>,
-        Query<(&mut Camera, &mut OrbitCamera, &mut Transform), With<OrbitCamera>>
+        Query<&mut OrbitCamera, With<OrbitCamera>>,
     )>,
     mut windows: ResMut<Windows>,
+    mut lines: ResMut<DebugLines>,
     input: Res<Input<KeyCode>>,
-    mut motion_evr: EventReader<MouseMotion>,
 ) {
-    let mut position = Vec3::default();
+    let mut camera = OrbitCamera::default();
 
-    for (Velocity, mut Transform) in query.p0().iter_mut() {
-        let Translation = &mut Transform.translation;
+    for orbit_camera in query.p1().iter_mut() {
+        camera = orbit_camera.clone();
+    }       
+
+
+    for (mut velocity, mut transform) in query.p0().iter_mut() {
+        
+        let mut translation = transform.translation;
+
+        // -- START DEBUG --
+        let mut orbit = camera::orbital_camera::calculate_orbit(
+            transform.rotation.x.to_degrees() + 90.0,
+            0.0,
+            10.0,
+        );
+
+        orbit.x += translation.x;
+        orbit.y += translation.y;
+        orbit.z += translation.z;
+
+        lines.line_colored(
+            translation,
+            orbit, 
+            0.0,
+            Color::CYAN
+        );
+        // -- END DEBUG --
+
 
         if input.pressed(KeyCode::W) {
-            Translation.y += 1.0;
+            velocity.linvel.x += 1.5;
         }
 
         if input.pressed(KeyCode::S) {
-            Translation.y -= 1.0;
+            velocity.linvel.x = -1.0;
         }
 
         if input.pressed(KeyCode::A) {
-            Translation.x -= 1.0;
+            velocity.linvel.z = 1.5;
         }
 
         if input.pressed(KeyCode::D) {
-            Translation.x += 1.0;
+            velocity.linvel.z = -1.5;
         }
 
-        if input.pressed(KeyCode::Q) {
-            Translation.z += 1.0;
-        }
-
-        if input.pressed(KeyCode::E) {
-            Translation.z -= 1.0;
-        }
 
         // -- Toggle mouse cursor 
         let window = windows.get_primary_mut().unwrap();
@@ -75,11 +96,6 @@ pub fn character_controller(
             window.set_cursor_lock_mode(false);
             window.set_cursor_visibility(true);
         }
-
-
-        position.x = Translation.x;
-        position.y = Translation.y;
-        position.z = Translation.z; 
     }
 }
 
@@ -92,11 +108,9 @@ pub fn instantiate_character_controller(
     
     // -- Camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     })
     .insert(OrbitCamera::default())      
-    .insert(Velocity::new(1.0, 0.0))
     .insert(Rotation::zero())
     .insert(CameraInputs::default());
 
@@ -104,11 +118,26 @@ pub fn instantiate_character_controller(
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Capsule { 
             radius: 0.5, 
+            depth: 1.0, 
             ..Default::default()
         })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        transform: Transform::from_xyz(0.0, 1.0, 0.0),
+        material: materials.add(Color::rgb(0.1, 0.2, 0.6).into()),
         ..default()
     })
-    .insert(Player);
+    .insert(Player)
+    .insert(Collider::capsule(
+        Vec3::new(0.0, -0.5, 0.0),
+        Vec3::new(0.0, 0.5, 0.0),
+        0.5,
+    ))
+    .insert(RigidBody::Dynamic)
+    .insert(Velocity {
+        linvel: Vec3::new(1.0, 2.0, 3.0),
+        angvel: Vec3::new(0.0, 0.0, 0.0),
+    })
+    .insert(GravityScale(0.7))
+    .insert(Sleeping::disabled())
+    .insert(Ccd::enabled())
+    .insert(LockedAxes::ROTATION_LOCKED);
 }   
