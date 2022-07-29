@@ -11,24 +11,6 @@ pub fn new(
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
 
-    // -- [ Point cloud generation ] -- //
-
-    // for x in 0..u32::pow(chunk.size + 1, 3) {
-    //     // -- Generate a random number --
-    //     let random_number = rand::random::<u8>();
-
-    //     let pos = Vec3::new(
-    //         (x % (chunk.size + 1)) as f32,
-    //         (x / (chunk.size + 1) % (chunk.size + 1)) as f32,
-    //         (x / (chunk.size + 1).pow(2)) as f32,
-    //     );  
-
-    //     chunk.point_cloud.push(Point {
-    //         level: random_number,
-    //         pos,
-    //     });
-    // }
-
     // -- [ Calculate a sphere point cloud ] -- //
 
     let mut chunk = Chunk::default();
@@ -46,24 +28,13 @@ pub fn new(
             (x / sum.pow(2)) as f32,
         );  
 
-        // if shpere[x as usize] == true{
-        //     chunk.point_cloud.push(Point {
-        //         level: 255, 
-        //         pos,
-        //     });
-        // }
-        
         if shpere[x as usize] == true{
-            commands.spawn_bundle(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Cube { 
-                    size: 1.0,   
-                    ..Default::default()
-                })),
-                transform: Transform::from_xyz(pos.x, pos.y, pos.z),
-                material: materials.add(Color::rgb(0.1, 0.2, 0.6).into()),
-                ..default()
+            chunk.point_cloud.push(Point {
+                level: 255, 
+                pos,
             });
         }
+        
     }
 
     // -- [ Marching cube ] -- //
