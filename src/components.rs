@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
+// use bevy_inspector_egui::Inspectable;
 
 // region: --Common Components--
 
@@ -20,7 +20,7 @@ impl Rotation {
 
 // region: --Character controller--
 
-#[derive(Default, Clone, Reflect, Inspectable)]
+#[derive(Default, Clone, Reflect)]
 #[reflect(name = "Camera Mode")]
 pub enum CameraMode {
     #[default]
@@ -96,66 +96,20 @@ impl CameraInputs {
 
 // endregion: --Inputs--
 
-pub struct Chunk {
-    pub position: Vec3,
-    pub size: u32,
-    pub isolevel: u8,
-    pub point_cloud: Vec<Point>,
+pub enum Initialized {
+    Loading,
+    Init,
+    Update,
 }
 
-impl Chunk {
-    pub fn default() -> Self {
+pub struct MarchingCubeNode {
+    pub state: Initialized,
+}
+
+impl Default for MarchingCubeNode {
+    fn default() -> Self {
         Self {
-            position: Vec3::default(),
-            size: 12,
-            isolevel: 200,
-            point_cloud: Vec::new(),
-        }
-    }
-
-    pub fn get_point(&mut self, pos: Vec3) -> Point {
-        let mut point = Point::default();
-
-        for f_point in &mut self.point_cloud {
-            if f_point.pos == pos {
-                point.pos = pos;        
-                point.level = f_point.level;
-            }
-        }
-
-        point
-    }
-}
-
-
-
-pub struct Triangle {
-    pub a: Vec3,
-    pub b: Vec3,
-    pub c: Vec3,
-}
-
-impl Triangle {
-    pub fn default() -> Self {
-        Self {
-            a: Vec3::default(),
-            b: Vec3::default(),
-            c: Vec3::default(),
-        }
-    }
-}
-
-
-pub struct Point {
-    pub level: u8,
-    pub pos: Vec3,
-}
-
-impl Point {
-    pub fn default() -> Self {
-        Self {
-            level: 0,
-            pos: Vec3::default(),
+            state: Initialized::Loading,
         }
     }
 }

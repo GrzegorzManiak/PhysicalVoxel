@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::*;
-use bevy_prototype_debug_lines::DebugLines;
-use bevy_rapier3d::prelude::{Collider, Velocity, GravityScale, Sleeping, Ccd, RigidBody, LockedAxes};
+// use bevy_inspector_egui::*;
+// use bevy_prototype_debug_lines::DebugLines;
+// use bevy_rapier3d::prelude::{Collider, Velocity, GravityScale, Sleeping, Ccd, RigidBody, LockedAxes};
 use crate::components::*;
  
 mod camera;
@@ -21,19 +21,19 @@ impl Plugin for CharacterControllerPlugin {
 
         app.init_resource::<CameraMode>();  
 
-        app.add_plugin(InspectorPlugin::<CameraMode>::new());
-        app.register_inspectable::<CameraMode>();
+        // app.add_plugin(InspectorPlugin::<CameraMode>::new());
+        // app.register_inspectable::<CameraMode>();
     }
 }
 
 
 pub fn character_controller(
     mut query: ParamSet<(
-        Query<(&mut Velocity, &mut Transform), With<Player>>,
+        Query<(&mut Transform), With<Player>>,
         Query<&mut OrbitCamera, With<OrbitCamera>>,
     )>,
     mut windows: ResMut<Windows>,
-    mut lines: ResMut<DebugLines>,
+    // mut lines: ResMut<DebugLines>,
     input: Res<Input<KeyCode>>,
 ) {
     let mut camera = OrbitCamera::default();
@@ -43,7 +43,7 @@ pub fn character_controller(
     }       
 
 
-    for (mut velocity, mut transform) in query.p0().iter_mut() {
+    for (mut transform) in query.p0().iter_mut() {
         
         let mut translation = transform.translation;
 
@@ -58,30 +58,30 @@ pub fn character_controller(
         orbit.y += translation.y;
         orbit.z += translation.z;
 
-        lines.line_colored(
-            translation,
-            orbit, 
-            0.0,
-            Color::CYAN
-        );
+        // lines.line_colored(
+        //     translation,
+        //     orbit, 
+        //     0.0,
+        //     Color::CYAN
+        // );
         // -- END DEBUG --
 
 
-        if input.pressed(KeyCode::W) {
-            velocity.linvel.x += 1.5;
-        }
+        // if input.pressed(KeyCode::W) {
+        //     velocity.linvel.x += 1.5;
+        // }
 
-        if input.pressed(KeyCode::S) {
-            velocity.linvel.x = -1.0;
-        }
+        // if input.pressed(KeyCode::S) {
+        //     velocity.linvel.x = -1.0;
+        // }
 
-        if input.pressed(KeyCode::A) {
-            velocity.linvel.z = 1.5;
-        }
+        // if input.pressed(KeyCode::A) {
+        //     velocity.linvel.z = 1.5;
+        // }
 
-        if input.pressed(KeyCode::D) {
-            velocity.linvel.z = -1.5;
-        }
+        // if input.pressed(KeyCode::D) {
+        //     velocity.linvel.z = -1.5;
+        // }
 
 
         // -- Toggle mouse cursor 
@@ -107,7 +107,7 @@ pub fn instantiate_character_controller(
 ) {
     
     // -- Camera
-    commands.spawn_bundle(PerspectiveCameraBundle {
+    commands.spawn_bundle(Camera3dBundle {
         ..default()
     })
     .insert(OrbitCamera::default())      
@@ -125,19 +125,19 @@ pub fn instantiate_character_controller(
         material: materials.add(Color::rgb(0.1, 0.2, 0.6).into()),
         ..default()
     })
-    .insert(Player)
-    .insert(Collider::capsule(
-        Vec3::new(0.0, -0.5, 0.0),
-        Vec3::new(0.0, 0.5, 0.0),
-        0.5,
-    ))
-    .insert(RigidBody::Dynamic)
-    .insert(Velocity {
-        linvel: Vec3::new(1.0, 2.0, 3.0),
-        angvel: Vec3::new(0.0, 0.0, 0.0),
-    })
-    .insert(GravityScale(0.7))
-    .insert(Sleeping::disabled())
-    .insert(Ccd::enabled())
-    .insert(LockedAxes::ROTATION_LOCKED);
+    .insert(Player);
+    // .insert(Collider::capsule(
+    //     Vec3::new(0.0, -0.5, 0.0),
+    //     Vec3::new(0.0, 0.5, 0.0),
+    //     0.5,
+    // ))
+    // .insert(RigidBody::Dynamic)
+    // .insert(Velocity {
+    //     linvel: Vec3::new(1.0, 2.0, 3.0),
+    //     angvel: Vec3::new(0.0, 0.0, 0.0),
+    // })
+    // .insert(GravityScale(0.7))
+    // .insert(Sleeping::disabled())
+    // .insert(Ccd::enabled())
+    // .insert(LockedAxes::ROTATION_LOCKED);
 }   

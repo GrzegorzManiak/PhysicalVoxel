@@ -4,13 +4,14 @@ version = "0.1.0"
 edition = "2021" # this needs to be 2021, or you need to set "resolver=2"
 
 [dependencies]
-bevy = "0.7.0" # { version = "0.7.0", features = ["simd-stable"] } 
+bevy = "0.8.0" # { version = "0.7.0", features = ["simd-stable"] } 
 rand = "0.8.5"
-bevy_easings = "0.7.0"
-bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy-editor-pls.git" }
-bevy_rapier3d = "0.15.0"
-bevy-inspector-egui = "0.11.0"
-bevy_prototype_debug_lines = { version = "0.7", features = ["3d"] }
+bevy_easings = "0.8.0"
+# bevy_rapier3d = "0.15.0"
+# bevy_shader_utils = "0.1.0"
+# bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy-editor-pls.git" }
+# bevy-inspector-egui = "0.11.0"
+# bevy_prototype_debug_lines = { version = "0.7.2", features = ["3d"] }
 
 [workspace]
 resolver = "2" # Important! wgpu/Bevy needs this!

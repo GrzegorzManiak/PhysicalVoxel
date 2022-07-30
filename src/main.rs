@@ -1,8 +1,5 @@
 use bevy::{prelude::*, math::vec3};
-use bevy_editor_pls::prelude::*;
-use bevy_rapier3d::prelude::*;
 use bevy_easings::EasingsPlugin;
-use bevy_prototype_debug_lines::*;
 
 mod components;
 mod controller;
@@ -21,7 +18,7 @@ fn setup(
         material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
         ..default()
     })
-    .insert(Collider::cuboid(100.0, 0.1, 100.0))
+    // .insert(Collider::cuboid(100.0, 0.1, 100.0))
     .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, -1.0, 0.0)));
 
 
@@ -42,16 +39,16 @@ fn setup(
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
+        // .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        // .add_plugin(RapierDebugRenderPlugin::default())
 
         .add_plugin(controller::CharacterControllerPlugin)
         .add_plugin(terrain_engine::VoxelEnginePlugin)
-
+        .add_plugin(terrain_engine::chunk::marching_cube::ComputePlugin)
         .insert_resource(Msaa { samples: 4 })
         .add_plugin(EasingsPlugin)
         .add_startup_system(setup)  
-        .add_plugin(DebugLinesPlugin::default())  
-        .add_plugin(EditorPlugin)
+        // .add_plugin(DebugLinesPlugin::default())  
+        // .add_plugin(EditorPlugin)
         .run();
 }
