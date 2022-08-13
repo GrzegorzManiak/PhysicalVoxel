@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 // use bevy_inspector_egui::*;
 // use bevy_prototype_debug_lines::DebugLines;
-// use bevy_rapier3d::prelude::{Collider, Velocity, GravityScale, Sleeping, Ccd, RigidBody, LockedAxes};
+use bevy_rapier3d::prelude::{Collider, Velocity, GravityScale, Sleeping, Ccd, RigidBody, LockedAxes};
 use crate::components::*;
  
 mod camera;

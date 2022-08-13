@@ -7,7 +7,7 @@ edition = "2021" # this needs to be 2021, or you need to set "resolver=2"
 bevy = "0.8.0" # { version = "0.7.0", features = ["simd-stable"] } 
 rand = "0.8.5"
 bevy_easings = "0.8.0"
-# bevy_rapier3d = "0.15.0"
+bevy_rapier3d = "0.16.0"
 # bevy_shader_utils = "0.1.0"
 # bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy-editor-pls.git" }
 # bevy-inspector-egui = "0.11.0"
